@@ -6,10 +6,10 @@ const { Pool } = require("pg");
 const app = express();
 app.use(express.json());
 
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl = process.env.NEON_DATABASE_URL || process.env.DATABASE_URL;
 
 if (!databaseUrl) {
-  throw new Error("DATABASE_URL is not set. Add your Neon connection string to .env.");
+  throw new Error("NEON_DATABASE_URL is not set. Add your Neon connection string to .env or Render env vars.");
 }
 
 const pool = new Pool({
@@ -67,9 +67,11 @@ async function startServer() {
     await pool.query("SELECT 1");
     await ensureSchema();
 
-    app.listen(3000, () => {
+    const port = process.env.PORT || 3000;
+
+    app.listen(port, () => {
       console.log("Connected to Neon database");
-      console.log("Server is running on port 3000");
+      console.log(`Server is running on port ${port}`);
     });
   } catch (err) {
     console.error("Connection error", err.stack);
